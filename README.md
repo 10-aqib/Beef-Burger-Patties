@@ -1,140 +1,583 @@
-# 🍔 SMASHD™ — Premium Gourmet Beef Burgers
+# Beef Burger Patties 🍔
 
-[![Vercel Deployment](https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com)
-[![React 19](https://img.shields.io/badge/React-19.2-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
-[![Vite](https://img.shields.io/badge/Vite-8.2-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
+**Beef Burger Patties** is a premium, modern burger restaurant web application designed for customers in Pakistan. The project combines a cinematic food-focused interface with a responsive ordering experience, interactive product customization, location discovery, deals, cart management, and a scalable backend architecture.
 
-A modern, fast-casual luxury web application for **SMASHD™**, featuring 100% grass-fed Angus smash burgers, hand-crafted sides, signature shakes, and an immersive culinary digital experience.
+The website is designed to provide the visual quality of a premium fast-food brand while maintaining a practical foundation for real-world restaurant operations.
 
 ---
 
 ## ✨ Features
 
-- **Fluid Full-Viewport Design**: Fluid container layout scaling from ultra-wide 4K monitors down to mobile handsets with zero awkward empty gutters.
-- **Interactive 3D-Style Burger Anatomy**: Real-time layer breakdown visualizer showcasing artisanal brioche, seared crust Angus patties, American cheddar, and house sauces.
-- **Dynamic Menu & Product Customizer**: Interactive selection of singles, doubles, combos, custom add-ons, and dietary options.
-- **Cart & Order Management**: Real-time slide-over cart drawer powered by Zustand with persistent local state.
-- **Multi-City Location Selector**: Dynamic store locator for Karachi, Lahore, and Islamabad with delivery radius checking.
-- **Deals & Limited-Time Drops**: Exclusive promo codes, bundle savings, and seasonal menu items.
-- **Supabase Cloud Backend**: Connected to Supabase with automatic resilient fallback to local seed data for instant zero-config evaluation.
-- **Production Optimized**: Rollup chunk splitting, Tailwind CSS v4 engine, and sub-second Vite HMR.
+### 🍔 Premium Burger Experience
 
----
+* Modern dark-themed restaurant interface
+* High-quality burger and food photography
+* Cinematic hero section
+* Interactive food animations
+* Premium typography and visual hierarchy
+* Responsive product cards
+* Featured and bestselling products
 
-## 🛠️ Tech Stack
+### 🛒 Online Ordering
 
-- **Framework**: [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
-- **Bundler & Tooling**: [Vite 8](https://vitejs.dev/)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) + Custom CSS tokens
-- **Animations**: [Framer Motion](https://www.framer.com/motion/) + [GSAP](https://greensock.com/gsap/)
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **State Management**: [Zustand](https://github.com/pmndrs/zustand)
-- **Routing**: [React Router DOM v7](https://reactrouter.com/)
-- **Backend / DB**: [Supabase](https://supabase.com/)
+* Browse the complete menu
+* Add products to cart
+* Customize burgers and meals
+* Select additional toppings/modifiers
+* Add kitchen instructions
+* Adjust quantities
+* View subtotal and delivery charges
+* Real-time cart updates
+* Checkout workflow
 
----
+### 📦 Order Management
 
-## 🚀 Quick Start
+Customers can:
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/10-aqib/Beef-Burger-Patties.git
-cd Beef-Burger-Patties
+* Place orders
+* View order details
+* Track order status
+* View previous orders
+* Receive order status updates
+
+Supported order workflow:
+
+```text
+PLACED
+   ↓
+CONFIRMED
+   ↓
+PREPARING
+   ↓
+READY
+   ↓
+OUT FOR DELIVERY
+   ↓
+DELIVERED
 ```
 
-### 2. Install Dependencies
+Orders can also be cancelled when applicable.
+
+---
+
+## 📍 Restaurant Locations
+
+The website supports multiple restaurant locations across Pakistan.
+
+Customers can:
+
+* Browse available branches
+* Filter locations by city
+* View branch information
+* View operating information
+* Get directions
+* Select a preferred location for ordering
+
+Example supported cities:
+
+* Islamabad
+* Rawalpindi
+* Lahore
+* Karachi
+
+---
+
+## 🔥 Deals & Combos
+
+A dedicated deals section allows customers to discover:
+
+* Burger combos
+* Meal deals
+* Family offers
+* Limited-time promotions
+* Discounted products
+
+Deals are designed to be managed dynamically rather than relying entirely on hardcoded frontend content.
+
+---
+
+## 👤 Authentication
+
+The application supports customer accounts with authentication functionality.
+
+Users can:
+
+* Create an account
+* Sign in
+* Sign out
+* Manage their profile
+* View their orders
+* Track active orders
+* Access account-specific information
+
+Authenticated users only have access to their own customer data.
+
+---
+
+## 🧑‍💼 Admin Dashboard
+
+The project is designed with restaurant administration in mind.
+
+Administrators can manage:
+
+* Products
+* Categories
+* Deals
+* Orders
+* Customers
+* Restaurant locations
+* Reviews
+* Delivery settings
+* Promotional content
+
+The admin system is separated from the customer-facing experience and protected using role-based access control.
+
+---
+
+## 🧩 Product Customization
+
+Customers can customize their orders before adding them to the cart.
+
+Customization can include:
+
+* Burger toppings
+* Cheese
+* Sauces
+* Extra patties
+* Add-ons
+* Meal upgrades
+* Kitchen instructions
+
+The selected modifiers are stored with the cart/order rather than being lost after checkout.
+
+---
+
+## 🎨 Design System
+
+The interface follows a **dark, high-contrast street-food luxury aesthetic**.
+
+### Color Direction
+
+```text
+Primary Background:     #080808
+Surface:                #171717
+Secondary Surface:      #1F1F1F
+Borders:                #2A2A2A
+Primary Accent:         #FF3B1F
+Secondary Accent:       #F59E0B
+Primary Text:           #FFFFFF
+```
+
+The design focuses on:
+
+* Dark surfaces
+* Strong red/orange accents
+* High-contrast typography
+* Cinematic food imagery
+* Sharp/block-style buttons
+* Minimal unnecessary decoration
+* Strong visual hierarchy
+* Premium restaurant branding
+
+---
+
+## 🎬 Cinematic Hero
+
+The homepage features a cinematic food-focused hero experience.
+
+The hero is designed to showcase the burger preparation process, including elements such as:
+
+* Fresh beef patties
+* High-temperature grilling
+* Cheese melting
+* Burger assembly
+* Chef interaction
+* Sizzling cooking visuals
+
+The animation is optimized for different screen sizes and can use compressed video formats such as:
+
+```text
+WebM
+MP4
+```
+
+with an optimized poster image for fast loading.
+
+---
+
+## 📱 Fully Responsive
+
+The website is designed to work across:
+
+### Desktop
+
+```text
+1920 × 1080
+1600 × 900
+1536 × 864
+1440 × 900
+1366 × 768
+1280 × 800
+```
+
+### Tablet
+
+```text
+1024 × 1366
+834 × 1112
+820 × 1180
+768 × 1024
+```
+
+### Mobile
+
+```text
+430 × 932
+414 × 896
+393 × 873
+390 × 844
+375 × 812
+```
+
+The layout uses fluid grids, responsive typography, adaptive spacing, and mobile-specific navigation.
+
+The goal is to ensure that the website uses the available viewport efficiently without creating:
+
+* Horizontal scrolling
+* Clipped content
+* Overlapping elements
+* Broken cards
+* Oversized images
+* Unnecessary empty space
+
+---
+
+# 🛠️ Technology Stack
+
+## Frontend
+
+* **React**
+* **TypeScript**
+* **Vite**
+* **Tailwind CSS**
+* **Framer Motion / GSAP**
+* **Lucide React**
+* Responsive CSS
+
+## Backend
+
+* **Supabase**
+* PostgreSQL
+* Supabase Authentication
+* Supabase Storage
+* Supabase Realtime
+* Row Level Security (RLS)
+
+---
+
+# 🗄️ Database Architecture
+
+The application can use a relational Supabase/PostgreSQL structure containing entities such as:
+
+```text
+profiles
+categories
+products
+product_images
+modifier_groups
+modifier_options
+deals
+locations
+orders
+order_items
+order_status_history
+delivery_zones
+reviews
+coupons
+newsletter_subscribers
+site_settings
+```
+
+Relationships between these entities allow the application to scale beyond a static restaurant website.
+
+---
+
+# 🔐 Security
+
+Security is an important part of the project.
+
+The application is designed to use:
+
+* Supabase Row Level Security
+* Role-based authorization
+* Protected admin routes
+* Authenticated customer routes
+* User-specific order access
+* Secure database policies
+* Environment variables
+* No exposed service-role credentials
+
+Sensitive Supabase credentials should never be committed to the repository.
+
+---
+
+# 📂 Project Structure
+
+A recommended project structure is:
+
+```text
+src/
+│
+├── components/
+│   ├── common/
+│   ├── header/
+│   ├── footer/
+│   ├── products/
+│   ├── cart/
+│   ├── checkout/
+│   └── admin/
+│
+├── pages/
+│   ├── Home/
+│   ├── Menu/
+│   ├── Deals/
+│   ├── About/
+│   ├── Locations/
+│   ├── Contact/
+│   ├── Checkout/
+│   ├── Profile/
+│   ├── OrderTracking/
+│   └── Admin/
+│
+├── hooks/
+│
+├── services/
+│   ├── supabase/
+│   ├── products/
+│   ├── orders/
+│   └── authentication/
+│
+├── store/
+│   ├── cart/
+│   └── user/
+│
+├── types/
+│
+├── utils/
+│
+├── assets/
+│
+├── App.tsx
+└── main.tsx
+```
+
+---
+
+# 🌐 Application Routes
+
+The application is structured around dedicated routes:
+
+```text
+/
+├── /menu
+├── /deals
+├── /about
+├── /locations
+├── /contact
+├── /checkout
+├── /profile
+├── /order-tracking
+└── /admin
+```
+
+Each route should provide a complete user experience instead of relying on placeholder `#` links.
+
+---
+
+# 🛍️ Customer Journey
+
+A typical customer journey is:
+
+```text
+Visit Website
+      ↓
+Explore Hero
+      ↓
+Browse Menu
+      ↓
+Select Burger
+      ↓
+Customize Burger
+      ↓
+Add to Cart
+      ↓
+Review Cart
+      ↓
+Checkout
+      ↓
+Place Order
+      ↓
+Order Confirmation
+      ↓
+Track Order
+      ↓
+Delivery
+```
+
+---
+
+# 🚀 Getting Started
+
+## 1. Clone the repository
+
+```bash
+git clone <repository-url>
+```
+
+## 2. Enter the project
+
+```bash
+cd beef-burger-patties
+```
+
+## 3. Install dependencies
+
 ```bash
 npm install
 ```
 
-### 3. Setup Environment Variables (Optional)
-The application works immediately out-of-the-box with bundled seed data. To connect your live Supabase project, copy `.env.example` to `.env.local`:
+## 4. Configure environment variables
 
-```bash
-cp .env.example .env.local
+Create:
+
+```text
+.env
 ```
 
-Configure your credentials:
+Add the required Supabase configuration:
+
 ```env
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key-here
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-### 4. Run Development Server
+Never place the Supabase service-role key in frontend environment variables.
+
+## 5. Start the development server
+
 ```bash
 npm run dev
 ```
-Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-### 5. Build for Production
+The application will normally be available at:
+
+```text
+http://localhost:5173
+```
+
+## 6. Build for production
+
 ```bash
 npm run build
 ```
-Production build artifacts will be generated in the `dist/` directory.
 
----
+## 7. Preview the production build
 
-## 🚀 Deploying to Vercel
-
-This repository is pre-configured for seamless 1-click deployment to [Vercel](https://vercel.com):
-
-1. Push your repository to GitHub.
-2. Go to [Vercel Dashboard](https://vercel.com/new) and click **"Add New Project"**.
-3. Import `Beef-Burger-Patties`.
-4. Vercel will auto-detect **Vite**:
-   - **Framework Preset**: `Vite`
-   - **Root Directory**: `./`
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist`
-5. *(Optional)* Add your `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` under **Environment Variables**.
-6. Click **Deploy**.
-
-> **Note on SPA Routing**: A [`vercel.json`](./vercel.json) file is included at the root with Single Page Application rewrites (`/(.*) -> /index.html`) to ensure direct route visits (such as `/menu`, `/deals`, `/locations`) reload without 404 errors.
-
----
-
-## 📁 Repository Structure
-
-```
-├── public/                 # Static assets (favicons, product images, brand marks)
-├── reference/              # Design specifications and source references
-│   ├── raw_frames/         # High-resolution animation sequence frames
-│   └── stitch/             # Stitch brand & luxury UI design references
-├── src/
-│   ├── assets/             # Bundled images and vectors
-│   ├── components/
-│   │   ├── anatomy/        # Interactive burger layer visualizer
-│   │   ├── auth/           # Login / Register modals
-│   │   ├── cart/           # Slide-over cart drawer & state
-│   │   ├── deals/          # Special bundles & promo section
-│   │   ├── hero/           # Cinematic hero & marquee banner
-│   │   ├── layout/         # Header, Footer, navigation & search
-│   │   ├── locations/      # City store finder & timing cards
-│   │   ├── menu/           # Product cards, grid & customizer
-│   │   └── reviews/        # Customer feedback & ratings carousel
-│   ├── hooks/              # Custom React hooks (products, auth, UI)
-│   ├── lib/                # Supabase client & fallback seed database
-│   ├── pages/              # Route pages (Home, Menu, Deals, Locations, Checkout, etc.)
-│   ├── services/           # Supabase data services
-│   ├── store/              # Zustand global stores (cart, UI)
-│   ├── types/              # TypeScript interface & type definitions
-│   ├── utils/              # Formatting & helper utilities
-│   ├── App.tsx             # Root router layout & provider wrappers
-│   ├── index.css           # Global typography, colors & fluid container tokens
-│   └── main.tsx            # React application entrypoint
-├── .env.example            # Sample environment variables
-├── .gitignore              # Git ignore rules for node_modules, dist, secrets
-├── index.html              # HTML shell with Google fonts & meta tags
-├── package.json            # Project dependencies and npm scripts
-├── tsconfig.json           # TypeScript configuration
-├── vercel.json             # Vercel deployment & SPA rewrite configuration
-└── vite.config.ts          # Vite build config with path aliases & chunk splitting
+```bash
+npm run preview
 ```
 
 ---
 
-## 📄 License
+# ⚙️ Environment Variables
 
-This project is proprietary and confidential. Developed for **SMASHD™ Beef Burger Patties**.
+The project may require:
+
+```env
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+```
+
+Additional environment variables can be added for external services when required.
+
+Keep `.env` files out of version control.
+
+---
+
+# 🧪 Quality & Testing
+
+Before deployment, verify:
+
+* [ ] No TypeScript errors
+* [ ] No console errors
+* [ ] No broken routes
+* [ ] No broken images
+* [ ] No horizontal overflow
+* [ ] Mobile layout works
+* [ ] Tablet layout works
+* [ ] Laptop layout works
+* [ ] Desktop layout works
+* [ ] Cart works correctly
+* [ ] Product customization works
+* [ ] Authentication works
+* [ ] Checkout works
+* [ ] Orders are stored correctly
+* [ ] Order tracking works
+* [ ] Admin authentication works
+* [ ] Supabase RLS policies work
+* [ ] No sensitive credentials are exposed
+* [ ] Production build succeeds
+
+---
+
+# 🚀 Future Enhancements
+
+Potential future improvements include:
+
+* Online payment gateway integration
+* Real-time kitchen dashboard
+* Delivery rider tracking
+* Push notifications
+* SMS order notifications
+* Coupon system
+* Loyalty/rewards program
+* Customer favorites
+* Advanced restaurant analytics
+* Inventory management
+* POS integration
+* Automated order notifications
+* AI-powered customer support
+* Personalized recommendations
+
+---
+
+# 🎯 Project Goal
+
+The goal of **Beef Burger Patties** is to create more than a static restaurant website.
+
+It is designed as a **complete digital restaurant platform** where customers can discover food, customize their meals, place orders, manage their accounts, and track their purchases while restaurant administrators can manage products, locations, deals, and orders from a centralized dashboard.
+
+The project combines:
+
+**Premium UI + Cinematic Food Experience + Responsive Design + Real Ordering + Supabase Backend + Restaurant Management**
+
+to create a modern production-ready burger ordering platform for the Pakistani market.
+
+---
+
+## 👨‍💻 Project Status
+
+**Status:** 🚧 Active Development
+
+The project is continuously being refined with emphasis on:
+
+* UI/UX quality
+* Responsive behavior
+* Performance
+* Real backend functionality
+* Accessibility
+* Security
+* Restaurant operations
+* Production readiness
+
+---
