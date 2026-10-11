@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Eye, EyeOff, Flame, Loader2 } from 'lucide-react'
 import { useUIStore } from '@/store/uiStore'
 import { useAuth } from '@/hooks/useAuth'
+import { useOverlayA11y } from '@/hooks/useOverlayA11y'
 import toast from 'react-hot-toast'
 
 export default function AuthModal() {
-  const { authModalOpen, authModalTab, closeAuthModal, openAuthModal } = useUIStore()
+  const { authModalOpen, authModalTab, closeAuthModal } = useUIStore()
   const { signIn, signUp, resetPassword } = useAuth()
+  const modalRef = useRef<HTMLDivElement>(null)
 
   const [mode, setMode] = useState<'login' | 'signup' | 'reset'>('login')
   const [email, setEmail] = useState('')
@@ -27,18 +29,11 @@ export default function AuthModal() {
     }
   }, [authModalOpen, authModalTab])
 
-  useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') closeAuthModal()
-    }
-    if (authModalOpen) document.addEventListener('keydown', handleKey)
-    return () => document.removeEventListener('keydown', handleKey)
-  }, [authModalOpen, closeAuthModal])
-
-  useEffect(() => {
-    document.body.style.overflow = authModalOpen ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
-  }, [authModalOpen])
+  useOverlayA11y({
+    isOpen: authModalOpen,
+    onClose: closeAuthModal,
+    containerRef: modalRef,
+  })
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -49,7 +44,7 @@ export default function AuthModal() {
       if (mode === 'login') {
         const { error: err } = await signIn(email, password)
         if (err) throw err
-        toast.success('Welcome back to Beef Burger Patties!', {
+        toast.success('Welcome back to Paput Burgers!', {
           icon: '🔥',
           style: { background: '#1F1F1F', color: '#fff', border: '1px solid #2A2A2A', fontFamily: 'Space Grotesk', fontWeight: 600 },
         })
@@ -96,8 +91,8 @@ export default function AuthModal() {
   }
 
   const subtitles = {
-    login: 'Access your Beef Burger Patties account',
-    signup: 'Join the Beef Burger Patties community',
+    login: 'Access your Paput Burgers account',
+    signup: 'Join the Paput Burgers community',
     reset: "We'll send you a reset link",
   }
 
@@ -107,7 +102,7 @@ export default function AuthModal() {
         <>
           {/* Backdrop */}
           <motion.div
-            className="fixed inset-0 bg-black/70 z-[90]"
+            className="fixed inset-0 bg-black/75 backdrop-blur-sm z-[90]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -117,6 +112,8 @@ export default function AuthModal() {
 
           {/* Modal */}
           <motion.div
+            ref={modalRef}
+            tabIndex={-1}
             className="fixed left-1/2 top-1/2 -translate-x-1/2 z-[100] w-[calc(100%-2rem)] max-w-md"
             style={{
               background: '#121212',
@@ -302,7 +299,7 @@ export default function AuthModal() {
               className="px-6 pb-5 pt-0 text-center text-[#737373]"
               style={{ fontSize: '10px', lineHeight: '14px' }}
             >
-              By continuing, you agree to Beef Burger Patties's Terms of Service and Privacy Policy.
+              By continuing, you agree to Paput Burgers's Terms of Service and Privacy Policy.
             </div>
           </motion.div>
         </>

@@ -3,6 +3,7 @@ import { motion, useInView, AnimatePresence } from 'framer-motion'
 import { Star, Quote, Plus, X } from 'lucide-react'
 import { getApprovedReviews, submitCustomerReview } from '@/services/reviewService'
 import { formatDate, getInitials } from '@/utils'
+import { useOverlayA11y } from '@/hooks/useOverlayA11y'
 import type { Review } from '@/types'
 import toast from 'react-hot-toast'
 
@@ -13,6 +14,13 @@ export default function ReviewsSection() {
   const [reviews, setReviews] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
+  const modalRef = useRef<HTMLDivElement>(null)
+
+  useOverlayA11y({
+    isOpen: modalOpen,
+    onClose: () => setModalOpen(false),
+    containerRef: modalRef,
+  })
 
   // Review form
   const [authorName, setAuthorName] = useState('')
@@ -45,7 +53,7 @@ export default function ReviewsSection() {
     setSubmitting(false)
 
     if (res.success) {
-      toast.success('Thank you! Your review has been published.')
+      toast.success('Thank you! Your review has been submitted for moderation.')
       setModalOpen(false)
       setAuthorName('')
       setTitle('')
@@ -79,7 +87,7 @@ export default function ReviewsSection() {
                 className="font-display font-bold uppercase tracking-widest text-[#F59E0B]"
                 style={{ fontSize: '11px', letterSpacing: '0.1em' }}
               >
-                VERIFIED SMASH LOVERS
+                CUSTOMER FEEDBACK
               </span>
             </motion.div>
             <motion.h2
@@ -89,9 +97,9 @@ export default function ReviewsSection() {
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.1 }}
             >
-              THE WORD ON
+              WHAT CUSTOMERS
               <br />
-              THE STREET
+              ARE SAYING
             </motion.h2>
           </div>
 
@@ -110,6 +118,25 @@ export default function ReviewsSection() {
             {[1, 2, 3].map((i) => (
               <div key={i} className="card p-6 h-56 animate-pulse bg-[#171717]" />
             ))}
+          </div>
+        ) : reviews.length === 0 ? (
+          <div className="card p-10 text-center max-w-xl mx-auto border border-dashed border-[#2A2A2A]">
+            <div className="w-12 h-12 rounded-full bg-[#1C1B1B] border border-[#2A2A2A] flex items-center justify-center mx-auto mb-4 text-[#F59E0B]">
+              <Star className="w-6 h-6" />
+            </div>
+            <h3 className="text-headline-sm font-display font-bold text-white uppercase mb-2">
+              SHARE YOUR EXPERIENCE
+            </h3>
+            <p className="text-body-sm text-[#A3A3A3] mb-6">
+              Have you ordered from Paput Burgers? Leave an honest review and let our community know about your experience.
+            </p>
+            <button
+              onClick={() => setModalOpen(true)}
+              className="btn-primary text-label-md px-6 py-2.5 inline-flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              LEAVE A REVIEW
+            </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
@@ -130,9 +157,15 @@ export default function ReviewsSection() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setModalOpen(false)}
+              aria-hidden="true"
             />
 
             <motion.div
+              ref={modalRef}
+              tabIndex={-1}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="review-modal-title"
               className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md px-4 z-[80]"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -140,8 +173,11 @@ export default function ReviewsSection() {
             >
               <div className="card p-6 shadow-2xl bg-[#121212] border border-[#2A2A2A]">
                 <div className="flex items-center justify-between pb-3 border-b border-[#2A2A2A] mb-4">
-                  <h3 className="text-headline-sm font-display font-bold text-white uppercase">
-                    DROP A SMASH REVIEW
+                  <h3
+                    id="review-modal-title"
+                    className="text-headline-sm font-display font-bold text-white uppercase"
+                  >
+                    LEAVE A REVIEW
                   </h3>
                   <button onClick={() => setModalOpen(false)} className="text-[#737373] hover:text-white">
                     <X className="w-5 h-5" />
@@ -292,7 +328,7 @@ function ReviewCard({ review, index }: { review: Review; index: number }) {
           </div>
         </div>
         <div className="ml-auto">
-          <span className="badge badge-dark text-[9px]">VERIFIED SMASH</span>
+          <span className="badge badge-dark text-[9px]">CUSTOMER REVIEW</span>
         </div>
       </div>
     </motion.div>

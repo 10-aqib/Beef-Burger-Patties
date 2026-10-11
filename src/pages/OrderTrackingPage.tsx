@@ -45,9 +45,32 @@ export default function OrderTrackingPage() {
 
   useEffect(() => {
     window.scrollTo(0, 0)
-    document.title = 'Track Your Order | Beef Burger Patties'
+    document.title = 'Track Your Order | Paput Burgers'
+    let unsubscribe: (() => void) | undefined
+
     if (id) {
-      loadOrder(id)
+      setLoading(true)
+      setSearched(true)
+      getOrderByIdOrNumber(id.trim()).then((result) => {
+        setOrder(result.order)
+        setItems(result.items)
+        setHistory(result.history)
+        setLoading(false)
+
+        if (result.order) {
+          unsubscribe = subscribeToOrderUpdates(result.order.id, (payload) => {
+            setOrder((prev) =>
+              prev ? { ...prev, status: payload.status, updated_at: payload.updated_at } : prev
+            )
+          })
+        }
+      })
+    }
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe()
+      }
     }
   }, [id])
 
@@ -61,14 +84,6 @@ export default function OrderTrackingPage() {
     setItems(result.items)
     setHistory(result.history)
     setLoading(false)
-
-    if (result.order) {
-      // Subscribe to real-time status updates!
-      const unsubscribe = subscribeToOrderUpdates(result.order.id, (payload) => {
-        setOrder((prev) => (prev ? { ...prev, status: payload.status, updated_at: payload.updated_at } : prev))
-      })
-      return () => unsubscribe()
-    }
   }
 
   function handleSearch(e: React.FormEvent) {
@@ -81,7 +96,7 @@ export default function OrderTrackingPage() {
   const currentStep = order ? getStepIndex(order.status) : 0
 
   return (
-    <main className="min-h-screen pt-28 pb-20" style={{ background: '#080808' }}>
+    <main id="main-content" className="min-h-screen pt-28 pb-20" style={{ background: '#080808' }}>
       <div className="container-max max-w-4xl">
         {/* Header */}
         <div className="text-center mb-10">
@@ -102,7 +117,7 @@ export default function OrderTrackingPage() {
           </h1>
 
           <p className="text-body-md text-[#A3A3A3] max-w-md mx-auto">
-            Enter your order number (e.g. SMD-202609-1234) to track real-time kitchen progress.
+            Enter your order number (e.g. PAPUT-202610-1234) to track real-time kitchen progress.
           </p>
 
           {/* Search bar */}
@@ -112,7 +127,7 @@ export default function OrderTrackingPage() {
               <input
                 type="text"
                 className="input pl-10 uppercase tracking-wider font-mono text-sm"
-                placeholder="SMD-202609-XXXX"
+                placeholder="PAPUT-202610-XXXX"
                 value={inputCode}
                 onChange={(e) => setInputCode(e.target.value)}
               />
@@ -277,11 +292,17 @@ export default function OrderTrackingPage() {
                   </div>
                 )}
                 <div className="flex justify-between text-white font-bold pt-2 border-t border-[#2A2A2A] text-base">
-                  <span>Total Paid ({order.payment_method.toUpperCase()})</span>
+                  <span>Total ({order.payment_method.toUpperCase()})</span>
                   <span className="text-[#F59E0B] font-display font-bold">
                     {formatPrice(order.total)}
                   </span>
                 </div>
+                {order.payment_reference && (
+                  <div className="flex justify-between text-xs text-[#A3A3A3] pt-1">
+                    <span>Payment Ref (TRX ID)</span>
+                    <span className="font-mono text-emerald-400 font-semibold">{order.payment_reference}</span>
+                  </div>
+                )}
               </div>
 
               {/* Delivery Address */}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Link, useParams } from 'react-router-dom'
-import { CheckCircle, Clock, MapPin, Package, ArrowRight, ShoppingBag } from 'lucide-react'
+import { CheckCircle, Clock, ArrowRight, Loader2 } from 'lucide-react'
 import { getOrderByIdOrNumber } from '@/services/orderService'
 import { formatPrice } from '@/utils'
 import type { Order, OrderItem } from '@/types'
@@ -14,18 +14,33 @@ export default function OrderConfirmationPage() {
 
   useEffect(() => {
     window.scrollTo(0, 0)
-    document.title = 'Order Confirmed | Beef Burger Patties'
+    document.title = 'Order Confirmed | Paput Burgers'
     if (id) {
       getOrderByIdOrNumber(id).then((res) => {
         setOrder(res.order)
         setItems(res.items)
         setLoading(false)
+      }).catch(() => {
+        setLoading(false)
       })
+    } else {
+      setLoading(false)
     }
   }, [id])
 
+  if (loading) {
+    return (
+      <main id="main-content" className="min-h-screen pt-28 pb-20 flex items-center justify-center" style={{ background: '#080808' }}>
+        <div className="flex flex-col items-center gap-4 text-center">
+          <Loader2 className="w-10 h-10 text-[#FF3B1F] animate-spin" />
+          <p className="text-body-md text-[#A3A3A3] uppercase tracking-wider font-semibold">Confirming order details...</p>
+        </div>
+      </main>
+    )
+  }
+
   return (
-    <main className="min-h-screen pt-28 pb-20" style={{ background: '#080808' }}>
+    <main id="main-content" className="min-h-screen pt-28 pb-20" style={{ background: '#080808' }}>
       <div className="container-max max-w-2xl">
         {/* Success banner */}
         <motion.div
@@ -59,7 +74,7 @@ export default function OrderConfirmationPage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
-            Thanks for ordering from Beef Burger Patties! Your order{' '}
+            Thanks for ordering from Paput Burgers! Your order{' '}
             <span className="font-display font-bold text-[#F59E0B]">
               {order?.order_number || id}
             </span>{' '}
@@ -127,11 +142,19 @@ export default function OrderConfirmationPage() {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-[#2A2A2A] text-xs text-[#737373]">
-              <span>Delivering to: </span>
-              <span className="text-white font-medium">
-                {order.delivery_address?.full_name}, {order.delivery_address?.street}, {order.delivery_address?.city}
-              </span>
+            <div className="pt-3 border-t border-[#2A2A2A] text-xs text-[#737373] space-y-1">
+              <div>
+                <span>Delivering to: </span>
+                <span className="text-white font-medium">
+                  {order.delivery_address?.full_name}, {order.delivery_address?.street}, {order.delivery_address?.city}
+                </span>
+              </div>
+              {order.payment_reference && (
+                <div>
+                  <span>Payment Ref (TRX ID): </span>
+                  <span className="font-mono text-emerald-400 font-semibold">{order.payment_reference}</span>
+                </div>
+              )}
             </div>
           </div>
         )}

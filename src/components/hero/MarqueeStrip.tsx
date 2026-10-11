@@ -1,5 +1,4 @@
 import React from 'react'
-import { motion } from 'framer-motion'
 
 const MARQUEE_ITEMS = [
   'FRESHLY SMASHED BEEF',
@@ -31,7 +30,7 @@ export default function MarqueeStrip() {
         background: '#FF3B1F',
         boxShadow: 'inset 0 -2px 0 rgba(0,0,0,0.2)',
       }}
-      aria-label="Beef Burger Patties brand highlights"
+      aria-label="Paput Burgers brand highlights"
     >
       <div
         className="flex whitespace-nowrap gap-8"

@@ -1,31 +1,8 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react'
-import { motion, AnimatePresence, useReducedMotion, type Variants } from 'framer-motion'
+import React, { useEffect, useRef, useState } from 'react'
+import { motion, useReducedMotion, type Variants } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { ChevronDown, Flame, Star, Sparkles } from 'lucide-react'
-import { lerp, prefersReducedMotion } from '@/utils'
+import { ChevronDown, Flame, Sparkles } from 'lucide-react'
 import { useUIStore } from '@/store/uiStore'
-
-// ─── Frame Configuration ──────────────────────────────────────
-// We use every 3rd frame from the 80-frame VEO 3 sequence = ~27 frames
-// This keeps performance good while maintaining smooth animation
-
-const TOTAL_SOURCE_FRAMES = 80
-const FRAME_STEP = 3
-const FRAME_INDICES: number[] = []
-for (let i = 0; i < TOTAL_SOURCE_FRAMES; i += FRAME_STEP) {
-  FRAME_INDICES.push(i)
-}
-
-const FPS = 12 // Cinematic frame rate
-const FRAME_DURATION = 1000 / FPS
-
-function getFrameUrl(index: number): string {
-  const padded = String(index).padStart(3, '0')
-  return `/frames/VEO 3_${padded}.jpg`
-}
-
-// Pre-generate all frame URLs
-const FRAME_URLS = FRAME_INDICES.map(getFrameUrl)
 
 // ─── Particle System ──────────────────────────────────────────
 interface Particle {
@@ -37,21 +14,30 @@ interface Particle {
   speed: number
   drift: number
   delay: number
+  repeatDelay: number
   type: 'steam' | 'ember'
+  color: string
 }
 
 function generateParticles(count: number): Particle[] {
-  return Array.from({ length: count }, (_, i) => ({
-    id: i,
-    x: 20 + Math.random() * 60, // % from left
-    y: 100 + Math.random() * 20, // % from top (start below viewport)
-    size: 4 + Math.random() * 8,
-    opacity: 0.3 + Math.random() * 0.4,
-    speed: 2 + Math.random() * 3,
-    drift: (Math.random() - 0.5) * 30,
-    delay: Math.random() * 4,
-    type: Math.random() > 0.7 ? 'ember' : 'steam',
-  }))
+  return Array.from({ length: count }, (_, i) => {
+    const isEmber = Math.random() > 0.7
+    return {
+      id: i,
+      x: 20 + Math.random() * 60, // % from left
+      y: 100 + Math.random() * 20, // % from top (start below viewport)
+      size: 4 + Math.random() * 8,
+      opacity: 0.3 + Math.random() * 0.4,
+      speed: 2 + Math.random() * 3,
+      drift: (Math.random() - 0.5) * 30,
+      delay: Math.random() * 4,
+      repeatDelay: Math.random() * 3,
+      type: isEmber ? 'ember' : 'steam',
+      color: isEmber
+        ? `rgba(255, ${Math.floor(100 + Math.random() * 60)}, 0, 0.7)`
+        : 'rgba(255,255,255,0.15)',
+    }
+  })
 }
 
 const PARTICLES = generateParticles(12)
@@ -94,154 +80,12 @@ const ctaVariants: Variants = {
 
 // ─── Main Hero Component ──────────────────────────────────────
 export default function CinematicHero() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
   const heroRef = useRef<HTMLDivElement>(null)
-  const imagesRef = useRef<HTMLImageElement[]>([])
-  const frameIdxRef = useRef(0)
-  const lastFrameTimeRef = useRef(0)
-  const animFrameRef = useRef<number>(0)
-  const mouseRef = useRef({ x: 0, y: 0 })
-  const parallaxRef = useRef({ x: 0, y: 0 })
-  const parallaxTargetRef = useRef({ x: 0, y: 0 })
-
-  const [framesLoaded, setFramesLoaded] = useState(0)
-  const [firstFrameReady, setFirstFrameReady] = useState(false)
-  const [contentVisible, setContentVisible] = useState(false)
+  const [videoError, setVideoError] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
 
   const reducedMotion = useReducedMotion()
   const { openCustomizer } = useUIStore()
-
-  // ─── Load Frames ─────────────────────────────────────────
-  useEffect(() => {
-    let loadedCount = 0
-
-    // Pre-create all image elements
-    imagesRef.current = FRAME_URLS.map((url, idx) => {
-      const img = new Image()
-      img.src = url
-      img.onload = () => {
-        loadedCount++
-        setFramesLoaded(loadedCount)
-        if (idx === 0) {
-          setFirstFrameReady(true)
-        }
-      }
-      img.onerror = () => {
-        // On error, still increment — we'll skip broken frames
-        loadedCount++
-        setFramesLoaded(loadedCount)
-        if (idx === 0) setFirstFrameReady(true)
-      }
-      return img
-    })
-
-    return () => {
-      imagesRef.current = []
-    }
-  }, [])
-
-  // ─── Canvas Drawing ───────────────────────────────────────
-  const drawFrame = useCallback((timestamp: number) => {
-    const canvas = canvasRef.current
-    const ctx = canvas?.getContext('2d')
-    if (!canvas || !ctx) return
-
-    // Advance frame at target FPS
-    if (timestamp - lastFrameTimeRef.current >= FRAME_DURATION) {
-      frameIdxRef.current = (frameIdxRef.current + 1) % imagesRef.current.length
-      lastFrameTimeRef.current = timestamp
-    }
-
-    const img = imagesRef.current[frameIdxRef.current]
-    if (!img?.complete || !img.naturalWidth) {
-      animFrameRef.current = requestAnimationFrame(drawFrame)
-      return
-    }
-
-    // Parallax lerp
-    parallaxRef.current.x = lerp(parallaxRef.current.x, parallaxTargetRef.current.x, 0.06)
-    parallaxRef.current.y = lerp(parallaxRef.current.y, parallaxTargetRef.current.y, 0.06)
-
-    const px = parallaxRef.current.x
-    const py = parallaxRef.current.y
-
-    // Canvas dimensions
-    const w = canvas.width
-    const h = canvas.height
-
-    // Draw with cover-fit + parallax offset
-    const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight)
-    const scaledW = img.naturalWidth * scale
-    const scaledH = img.naturalHeight * scale
-    const offsetX = (w - scaledW) / 2 + px
-    const offsetY = (h - scaledH) / 2 + py
-
-    ctx.clearRect(0, 0, w, h)
-    ctx.drawImage(img, offsetX, offsetY, scaledW, scaledH)
-
-    animFrameRef.current = requestAnimationFrame(drawFrame)
-  }, [])
-
-  // ─── Animation Loop ───────────────────────────────────────
-  useEffect(() => {
-    if (!firstFrameReady) return
-    if (reducedMotion) return // Static poster for reduced motion
-
-    animFrameRef.current = requestAnimationFrame(drawFrame)
-    return () => {
-      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current)
-    }
-  }, [firstFrameReady, drawFrame, reducedMotion])
-
-  // Draw static first frame for reduced motion
-  useEffect(() => {
-    if (!reducedMotion || !firstFrameReady) return
-    const canvas = canvasRef.current
-    const ctx = canvas?.getContext('2d')
-    const img = imagesRef.current[0]
-    if (!canvas || !ctx || !img?.complete) return
-
-    const w = canvas.width
-    const h = canvas.height
-    const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight)
-    const scaledW = img.naturalWidth * scale
-    const scaledH = img.naturalHeight * scale
-    const offsetX = (w - scaledW) / 2
-    const offsetY = (h - scaledH) / 2
-    ctx.drawImage(img, offsetX, offsetY, scaledW, scaledH)
-  }, [firstFrameReady, reducedMotion])
-
-  // ─── Canvas Resize ────────────────────────────────────────
-  useEffect(() => {
-    function resize() {
-      const canvas = canvasRef.current
-      if (!canvas) return
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
-    }
-    resize()
-    window.addEventListener('resize', resize)
-    return () => window.removeEventListener('resize', resize)
-  }, [])
-
-  // ─── Mouse Parallax ───────────────────────────────────────
-  useEffect(() => {
-    if (reducedMotion) return
-
-    function handleMouse(e: MouseEvent) {
-      const MAX_SHIFT = 18
-      const cx = window.innerWidth / 2
-      const cy = window.innerHeight / 2
-      parallaxTargetRef.current = {
-        x: ((e.clientX - cx) / cx) * MAX_SHIFT,
-        y: ((e.clientY - cy) / cy) * MAX_SHIFT * 0.6,
-      }
-    }
-
-    window.addEventListener('mousemove', handleMouse, { passive: true })
-    return () => window.removeEventListener('mousemove', handleMouse)
-  }, [reducedMotion])
 
   // ─── Scroll Parallax Content Fade ─────────────────────────
   useEffect(() => {
@@ -253,16 +97,6 @@ export default function CinematicHero() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // ─── Reveal Content after first frame loads ────────────────
-  useEffect(() => {
-    if (firstFrameReady) {
-      setTimeout(() => setContentVisible(true), 200)
-    }
-  }, [firstFrameReady])
-
-  // ─── Loading progress ──────────────────────────────────────
-  const loadProgress = Math.round((framesLoaded / FRAME_URLS.length) * 100)
-
   return (
     <section
       ref={heroRef}
@@ -271,22 +105,34 @@ export default function CinematicHero() {
         height: '100dvh',
         minHeight: '600px',
       }}
-      aria-label="Beef Burger Patties cinematic hero"
+      aria-label="Paput Burgers cinematic hero"
     >
-      {/* ─── Background Video Animation (VEO 3) ─────────────── */}
+      {/* ─── Background Media (Video with Poster Fallback & Reduced Motion) ─── */}
       <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
-        <video
-          src="/videos/veo-3.mp4"
-          poster="/frames/VEO 3_000.jpg"
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full h-full object-cover object-center"
-          style={{
-            filter: 'contrast(1.08) brightness(0.92) saturate(1.15)',
-          }}
-        />
+        {videoError || reducedMotion ? (
+          <img
+            src="/images/hero-poster.jpg"
+            alt="Fresh Smashed Beef Patties Sizzling on Griddle"
+            className="w-full h-full object-cover object-center"
+            style={{
+              filter: 'contrast(1.08) brightness(0.92) saturate(1.15)',
+            }}
+          />
+        ) : (
+          <video
+            src="/videos/veo-3.mp4"
+            poster="/images/hero-poster.jpg"
+            autoPlay
+            loop
+            muted
+            playsInline
+            onError={() => setVideoError(true)}
+            className="w-full h-full object-cover object-center"
+            style={{
+              filter: 'contrast(1.08) brightness(0.92) saturate(1.15)',
+            }}
+          />
+        )}
       </div>
 
       {/* ─── Gradient Overlays ──────────────────────────── */}
@@ -332,10 +178,7 @@ export default function CinematicHero() {
                 left: `${particle.x}%`,
                 width: particle.size,
                 height: particle.size * (particle.type === 'steam' ? 1.5 : 1),
-                background:
-                  particle.type === 'steam'
-                    ? 'rgba(255,255,255,0.15)'
-                    : `rgba(255, ${100 + Math.random() * 60}, 0, 0.7)`,
+                background: particle.color,
                 filter: particle.type === 'steam' ? 'blur(4px)' : 'blur(1px)',
               }}
               initial={{ y: '100vh', opacity: 0, x: 0 }}
@@ -349,7 +192,7 @@ export default function CinematicHero() {
                 duration: particle.speed + 2,
                 delay: particle.delay,
                 repeat: Infinity,
-                repeatDelay: Math.random() * 3,
+                repeatDelay: particle.repeatDelay,
                 ease: 'easeOut',
               }}
             />
@@ -491,16 +334,12 @@ export default function CinematicHero() {
                   border: '1px solid rgba(255, 255, 255, 0.1)',
                 }}
               >
-                <div className="flex items-center text-[#F59E0B]">
-                  <Star className="w-3.5 h-3.5 fill-[#F59E0B]" />
-                  <Star className="w-3.5 h-3.5 fill-[#F59E0B]" />
-                  <Star className="w-3.5 h-3.5 fill-[#F59E0B]" />
-                  <Star className="w-3.5 h-3.5 fill-[#F59E0B]" />
-                  <Star className="w-3.5 h-3.5 fill-[#F59E0B]" />
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#34D399] animate-pulse" />
+                  <span className="text-body-sm font-semibold text-white">100% FRESH HALAL BEEF</span>
                 </div>
-                <span className="text-body-sm font-semibold text-white">4.9 / 5.0</span>
                 <span className="text-body-sm text-[#A3A3A3]">
-                  (14,820+ Smash Lovers)
+                  Smashed Raw-to-Order Daily
                 </span>
               </div>
             </motion.div>
@@ -529,13 +368,6 @@ export default function CinematicHero() {
           <ChevronDown className="w-5 h-5" />
         </motion.div>
       </motion.a>
-
-      {/* ─── Frame Counter (Dev mode only) ──────────────── */}
-      {import.meta.env.DEV && (
-        <div className="absolute bottom-4 right-4 z-30 text-[10px] text-[#737373] font-mono bg-black/50 px-2 py-1 rounded">
-          Frames: {framesLoaded}/{FRAME_URLS.length}
-        </div>
-      )}
     </section>
   )
 }

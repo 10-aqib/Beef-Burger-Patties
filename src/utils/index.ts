@@ -1,12 +1,24 @@
 // ============================================================
-// Beef Burger Patties — Utility Functions
+// Paput Burgers — Utility Functions
 // ============================================================
 
 /**
  * Format a price in Pakistani Rupees
+ * Guarantees zero negative numbers, NaN values, or double currency symbols
  */
-export function formatPrice(amount: number): string {
-  return `Rs. ${amount.toLocaleString('en-PK')}`
+export function formatPrice(amount: number | string | undefined | null): string {
+  if (amount === undefined || amount === null) return 'Rs. 0'
+  let num: number
+  if (typeof amount === 'string') {
+    const cleaned = amount.replace(/^(Rs\.?|PKR)\s*/i, '').trim()
+    num = parseFloat(cleaned.replace(/,/g, ''))
+  } else {
+    num = amount
+  }
+  if (typeof num !== 'number' || isNaN(num) || num < 0) {
+    return 'Rs. 0'
+  }
+  return `Rs. ${Math.round(num).toLocaleString('en-PK')}`
 }
 
 /**
@@ -177,3 +189,98 @@ export function renderStars(rating: number): string {
   const empty = 5 - full - half
   return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty)
 }
+
+/**
+ * Get current date/time in Asia/Karachi (Pakistan Standard Time, UTC+5)
+ */
+export function getPakistanTime(baseDate = new Date()): Date {
+  try {
+    const pstString = baseDate.toLocaleString('en-US', { timeZone: 'Asia/Karachi' })
+    return new Date(pstString)
+  } catch {
+    // Fallback: UTC + 5 hours
+    const utc = baseDate.getTime() + baseDate.getTimezoneOffset() * 60000
+    return new Date(utc + 5 * 3600000)
+  }
+}
+
+/**
+ * Parse time string like "12:00 PM" into minutes from midnight (0 - 1439)
+ */
+export function parseTimeStringToMinutes(timeStr: string): number | null {
+  const match = timeStr.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i)
+  if (!match) return null
+  let hours = parseInt(match[1], 10)
+  const minutes = parseInt(match[2], 10)
+  const period = match[3].toUpperCase()
+
+  if (period === 'AM') {
+    if (hours === 12) hours = 0
+  } else if (period === 'PM') {
+    if (hours !== 12) hours += 12
+  }
+
+  return hours * 60 + minutes
+}
+
+export interface BranchHoursStatus {
+  isOpen: boolean
+  statusText: string
+  detailText: string
+}
+
+/**
+ * Check if a branch is currently open based on opening_hours string
+ * (e.g. "12:00 PM – 04:00 AM") in Pakistan Standard Time.
+ * Handles midnight crossovers accurately.
+ */
+export function isLocationCurrentlyOpen(
+  openingHoursStr: string | undefined | null,
+  isBranchActive = true,
+  currentDate = new Date()
+): BranchHoursStatus {
+  if (!isBranchActive) {
+    return { isOpen: false, statusText: 'COMING SOON', detailText: 'Opening soon' }
+  }
+
+  if (!openingHoursStr || typeof openingHoursStr !== 'string') {
+    return { isOpen: true, statusText: 'OPEN NOW', detailText: 'Daily service' }
+  }
+
+  const clean = openingHoursStr.trim()
+  if (/24\s*(hours|\/7)/i.test(clean)) {
+    return { isOpen: true, statusText: 'OPEN 24/7', detailText: 'Always open' }
+  }
+
+  // Split by dash/en-dash/em-dash/to
+  const parts = clean.split(/[–—\-]|to/i).map((s) => s.trim())
+  if (parts.length < 2) {
+    return { isOpen: true, statusText: 'OPEN NOW', detailText: clean }
+  }
+
+  const startMinutes = parseTimeStringToMinutes(parts[0])
+  const endMinutes = parseTimeStringToMinutes(parts[1])
+
+  if (startMinutes === null || endMinutes === null) {
+    return { isOpen: true, statusText: 'OPEN NOW', detailText: clean }
+  }
+
+  const pktDate = getPakistanTime(currentDate)
+  const currentMinutes = pktDate.getHours() * 60 + pktDate.getMinutes()
+
+  let isOpen = false
+  if (startMinutes < endMinutes) {
+    // Normal window within the same calendar day (e.g. 11:00 AM to 11:00 PM)
+    isOpen = currentMinutes >= startMinutes && currentMinutes < endMinutes
+  } else {
+    // Midnight crossing (e.g. 12:00 PM to 04:00 AM)
+    isOpen = currentMinutes >= startMinutes || currentMinutes < endMinutes
+  }
+
+  return {
+    isOpen,
+    statusText: isOpen ? 'OPEN NOW' : 'CLOSED NOW',
+    detailText: isOpen ? `Closes at ${parts[1]}` : `Opens at ${parts[0]}`,
+  }
+}
+

@@ -1,7 +1,7 @@
 import type { Product, Category, Location, Review, Deal } from '@/types'
 
 // ============================================================
-// Beef Burger Patties — Seed Data (Used when Supabase is not configured)
+// Paput Burgers — Seed Data (Used when Supabase is not configured)
 // ============================================================
 
 export const SEED_CATEGORIES: Category[] = [
@@ -51,8 +51,8 @@ export const SEED_PRODUCTS: Product[] = [
   {
     id: 'prod-og-double',
     category_id: 'cat-burgers',
-    name: 'BEEF BURGER PATTIES OG DOUBLE',
-    slug: 'beef-burger-og-double',
+    name: 'PAPUT OG DOUBLE',
+    slug: 'paput-og-double',
     description:
       'Dual lace-edged Angus beef patties, molten aged cheddar, grilled caramelized onion jam, signature smash dip, butter-griddled potato brioche.',
     price: 849,
@@ -415,8 +415,8 @@ export const SEED_DEALS: Deal[] = [
     price: 2199,
     original_price: 2850,
     discount_percentage: 23,
-    badge: 'SAVE 25% OFF',
-    items_description: '• 2x Signature Beef Burger Patties Doubles\n• 1x Animal-Style Loaded Fries\n• 2x Chilled Gourmet Sodas\n• 2x House Smash & Chipotle Dips',
+    badge: 'SAVE 23% OFF',
+    items_description: '• 2x Signature Paput OG Doubles\n• 1x Animal-Style Loaded Fries\n• 2x Chilled Gourmet Sodas\n• 2x House Smash & Chipotle Dips',
     is_active: true,
     start_date: null,
     end_date: null,

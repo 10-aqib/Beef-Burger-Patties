@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { ShoppingBag, MapPin, Search, User, Menu, X, ChevronDown, Flame, ShieldAlert } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCartStore } from '@/store/cartStore'
 import { useUIStore } from '@/store/uiStore'
 import { useAuth } from '@/hooks/useAuth'
+import { useOverlayA11y } from '@/hooks/useOverlayA11y'
 import { formatPrice } from '@/utils'
 
 // ─── Real Nav Links ──────────────────────────────────────────
@@ -20,8 +21,8 @@ const NAV_LINKS = [
 export default function Header() {
   const [scrolled, setScrolled] = useState(false)
   const headerRef = useRef<HTMLElement>(null)
+  const mobileNavRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
-  const navigate = useNavigate()
 
   const { items, toggleCart, getSummary } = useCartStore()
   const {
@@ -52,11 +53,12 @@ export default function Header() {
     closeMobileNav()
   }, [location.pathname, closeMobileNav])
 
-  // ─── Prevent body scroll when mobile nav is open ──────────
-  useEffect(() => {
-    document.body.style.overflow = mobileNavOpen ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
-  }, [mobileNavOpen])
+  // ─── Accessible Overlay Management (ESC stack, scroll lock, focus trap)
+  useOverlayA11y({
+    isOpen: mobileNavOpen,
+    onClose: closeMobileNav,
+    containerRef: mobileNavRef,
+  })
 
   function isActive(path: string) {
     if (path === '/') return location.pathname === '/'
@@ -81,7 +83,7 @@ export default function Header() {
             <Link
               to="/"
               className="flex items-center gap-2.5 sm:gap-3 shrink-0 group"
-              aria-label="Beef Burger Patties Home"
+              aria-label="Paput Burgers Home"
             >
               <div className="relative shrink-0">
                 <div className="w-9 h-9 relative flex items-center justify-center">
@@ -94,10 +96,10 @@ export default function Header() {
                   className="font-display font-black text-white uppercase tracking-tight text-sm sm:text-base md:text-[17px]"
                   style={{ letterSpacing: '-0.02em', lineHeight: 1.05 }}
                 >
-                  BEEF BURGER
+                  PAPUT
                 </span>
                 <span className="font-display text-[9px] font-bold tracking-[0.16em] text-[#FF3B1F] uppercase mt-0.5">
-                  PATTIES · PAKISTAN
+                  BURGERS · PAKISTAN
                 </span>
               </div>
             </Link>
@@ -249,7 +251,7 @@ export default function Header() {
           <>
             {/* Backdrop */}
             <motion.div
-              className="fixed inset-0 bg-black/70 z-40 xl:hidden"
+              className="fixed inset-0 bg-black/75 backdrop-blur-sm z-[60] xl:hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -260,7 +262,12 @@ export default function Header() {
 
             {/* Panel */}
             <motion.div
-              className="fixed top-0 left-0 h-full w-[320px] max-w-[90vw] z-50 xl:hidden flex flex-col"
+              ref={mobileNavRef}
+              tabIndex={-1}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Mobile navigation"
+              className="fixed top-0 left-0 h-full w-[320px] max-w-[90vw] z-[70] xl:hidden flex flex-col shadow-2xl"
               style={{ background: '#080808', borderRight: '1px solid #2A2A2A' }}
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
@@ -273,10 +280,10 @@ export default function Header() {
                   <Flame className="w-5 h-5 text-[#FF3B1F]" />
                   <div className="flex flex-col leading-none">
                     <span className="font-display font-black text-white text-base uppercase tracking-tight">
-                      BEEF BURGER
+                      PAPUT
                     </span>
                     <span className="font-display text-[8.5px] font-bold text-[#FF3B1F] tracking-[0.14em] uppercase mt-0.5">
-                      PATTIES · PAKISTAN
+                      BURGERS · PAKISTAN
                     </span>
                   </div>
                 </div>

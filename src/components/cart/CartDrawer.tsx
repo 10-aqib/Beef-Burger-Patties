@@ -1,31 +1,25 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, Zap } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useCartStore, FREE_DELIVERY_AMOUNT, DELIVERY_FEE } from '@/store/cartStore'
+import { useCartStore, FREE_DELIVERY_AMOUNT } from '@/store/cartStore'
+import { useOverlayA11y } from '@/hooks/useOverlayA11y'
 import { formatPrice } from '@/utils'
 import type { CartItem } from '@/types'
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, updateQuantity, removeItem, getSummary } = useCartStore()
+  const drawerRef = useRef<HTMLDivElement>(null)
   const summary = getSummary()
   const freeDeliveryRemaining = Math.max(0, FREE_DELIVERY_AMOUNT - summary.subtotal)
   const freeDeliveryProgress = Math.min(100, (summary.subtotal / FREE_DELIVERY_AMOUNT) * 100)
 
-  // ESC key
-  React.useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') closeCart()
-    }
-    if (isOpen) document.addEventListener('keydown', handleKey)
-    return () => document.removeEventListener('keydown', handleKey)
-  }, [isOpen, closeCart])
-
-  // Body scroll lock
-  React.useEffect(() => {
-    document.body.style.overflow = isOpen ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
-  }, [isOpen])
+  // Accessible overlay management (scroll lock, escape stack, focus trap & restoration)
+  useOverlayA11y({
+    isOpen,
+    onClose: closeCart,
+    containerRef: drawerRef,
+  })
 
   return (
     <AnimatePresence>
@@ -33,7 +27,7 @@ export default function CartDrawer() {
         <>
           {/* Backdrop */}
           <motion.div
-            className="fixed inset-0 bg-black/60 z-[70]"
+            className="fixed inset-0 bg-black/75 backdrop-blur-sm z-[70]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -44,6 +38,8 @@ export default function CartDrawer() {
 
           {/* Drawer */}
           <motion.div
+            ref={drawerRef}
+            tabIndex={-1}
             className="cart-drawer z-[80]"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}

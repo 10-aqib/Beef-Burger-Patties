@@ -1,21 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
-import {
-  LayoutDashboard,
-  ShoppingBag,
-  UtensilsCrossed,
-  Settings,
-  RefreshCw,
-  CheckCircle,
-  Clock,
-  Bike,
-  AlertCircle,
-  Filter,
-  DollarSign
-} from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
 import { getAllOrders, updateOrderStatus } from '@/services/orderService'
 import { getProducts } from '@/services/productService'
-import { getKitchenStatus, getDeliveryConfig } from '@/services/settingsService'
 import { formatPrice, formatDate } from '@/utils'
 import type { Order, OrderStatus, Product } from '@/types'
 import toast from 'react-hot-toast'
@@ -30,7 +16,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     window.scrollTo(0, 0)
-    document.title = 'Beef Burger Patties Admin | Kitchen Operations'
+    document.title = 'Paput Burgers Admin | Kitchen Operations'
     loadData()
   }, [])
 
@@ -74,7 +60,7 @@ export default function AdminPage() {
   ).length
 
   return (
-    <main className="min-h-screen pt-28 pb-20" style={{ background: '#080808' }}>
+    <main id="main-content" className="min-h-screen pt-28 pb-20" style={{ background: '#080808' }}>
       <div className="container-max">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
@@ -82,7 +68,7 @@ export default function AdminPage() {
             <div className="flex items-center gap-2 mb-1">
               <span className="w-2.5 h-2.5 rounded-full bg-[#34D399] animate-pulse" />
               <span className="text-[11px] font-display font-bold uppercase tracking-widest text-[#34D399]">
-                BEEF BURGER PATTIES DASHBOARD
+                PAPUT BURGERS DASHBOARD
               </span>
             </div>
             <h1 className="text-headline-md sm:text-headline-lg font-display font-bold text-white uppercase tracking-tight">

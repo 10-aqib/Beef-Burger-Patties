@@ -1,17 +1,17 @@
 import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Flame, ShieldCheck, Award, Zap, ArrowRight } from 'lucide-react'
+import { Flame, ShieldCheck, Award, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import AnatomySection from '@/components/anatomy/AnatomySection'
 
 export default function AboutPage() {
   useEffect(() => {
     window.scrollTo(0, 0)
-    document.title = 'About Us | Beef Burger Patties'
+    document.title = 'About Us | Paput Burgers'
   }, [])
 
   return (
-    <main className="min-h-screen pt-28 pb-20" style={{ background: '#080808' }}>
+    <main id="main-content" className="min-h-screen pt-28 pb-20" style={{ background: '#080808' }}>
       <div className="container-max">
         {/* Hero Banner */}
         <div className="text-center max-w-4xl mx-auto mb-20">
@@ -42,7 +42,7 @@ export default function AboutPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            Beef Burger Patties was born out of frustration with thick, grey, steamed burger patties. We brought Pakistan its first authentic cast-iron smash operation: raw ground Angus smashed at 450°F to unlock the ultimate Maillard reaction.
+            Paput Burgers was born out of frustration with thick, grey, steamed burger patties. We brought Pakistan its first authentic cast-iron smash operation: raw ground Angus smashed at 450°F to unlock the ultimate Maillard reaction.
           </motion.p>
         </div>
 

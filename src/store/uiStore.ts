@@ -47,7 +47,7 @@ interface UIState {
 }
 
 const initialCity = typeof window !== 'undefined'
-  ? localStorage.getItem('beef-burger-city') || localStorage.getItem('smashd-city') || 'Islamabad'
+  ? localStorage.getItem('paput-burger-city') || localStorage.getItem('beef-burger-city') || localStorage.getItem('smashd-city') || 'Islamabad'
   : 'Islamabad'
 
 export const useUIStore = create<UIState>((set) => ({
@@ -79,7 +79,7 @@ export const useUIStore = create<UIState>((set) => ({
   selectedCity: initialCity,
   locationModalOpen: false,
   setSelectedCity: (city) => {
-    localStorage.setItem('beef-burger-city', city)
+    localStorage.setItem('paput-burger-city', city)
     set({ selectedCity: city })
   },
   openLocationModal: () => set({ locationModalOpen: true }),

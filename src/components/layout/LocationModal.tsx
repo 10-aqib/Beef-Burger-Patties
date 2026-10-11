@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MapPin, X, Check, Clock, Bike } from 'lucide-react'
 import { useUIStore } from '@/store/uiStore'
+import { useOverlayA11y } from '@/hooks/useOverlayA11y'
 import toast from 'react-hot-toast'
 
 const CITY_OPTIONS = [
@@ -37,6 +38,13 @@ const CITY_OPTIONS = [
 
 export default function LocationModal() {
   const { locationModalOpen, closeLocationModal, selectedCity, setSelectedCity } = useUIStore()
+  const modalRef = useRef<HTMLDivElement>(null)
+
+  useOverlayA11y({
+    isOpen: locationModalOpen,
+    onClose: closeLocationModal,
+    containerRef: modalRef,
+  })
 
   function handleSelect(city: string) {
     setSelectedCity(city)
@@ -55,10 +63,16 @@ export default function LocationModal() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeLocationModal}
+            aria-hidden="true"
           />
 
           {/* Modal Container */}
           <motion.div
+            ref={modalRef}
+            tabIndex={-1}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="location-modal-title"
             className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg px-4 z-[80]"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -72,7 +86,10 @@ export default function LocationModal() {
               <div className="flex items-center justify-between pb-4 border-b border-[#2A2A2A] mb-4">
                 <div className="flex items-center gap-2.5">
                   <MapPin className="w-5 h-5 text-[#FF3B1F]" />
-                  <h2 className="text-headline-sm font-display font-bold text-white uppercase tracking-tight">
+                  <h2
+                    id="location-modal-title"
+                    className="text-headline-sm font-display font-bold text-white uppercase tracking-tight"
+                  >
                     SELECT YOUR CITY
                   </h2>
                 </div>

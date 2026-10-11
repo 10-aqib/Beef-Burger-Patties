@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { MapPin, Clock, Phone, ExternalLink, Navigation } from 'lucide-react'
+import { MapPin, Clock, Phone, Navigation } from 'lucide-react'
 import { getLocations } from '@/services/locationService'
+import { isLocationCurrentlyOpen } from '@/utils'
 import type { Location } from '@/types'
 
 const CITIES = ['All', 'Islamabad', 'Rawalpindi', 'Lahore', 'Karachi']
@@ -13,7 +14,7 @@ export default function LocationsPage() {
 
   useEffect(() => {
     window.scrollTo(0, 0)
-    document.title = 'Locations | Beef Burger Patties'
+    document.title = 'Locations | Paput Burgers'
     setLoading(true)
     getLocations(selectedCity).then((data) => {
       setLocations(data)
@@ -22,7 +23,7 @@ export default function LocationsPage() {
   }, [selectedCity])
 
   return (
-    <main className="min-h-screen pt-28 pb-20" style={{ background: '#080808' }}>
+    <main id="main-content" className="min-h-screen pt-28 pb-20" style={{ background: '#080808' }}>
       <div className="container-max">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-12">
@@ -93,6 +94,7 @@ export default function LocationsPage() {
               const gmapsUrl = loc.latitude && loc.longitude
                 ? `https://www.google.com/maps?q=${loc.latitude},${loc.longitude}`
                 : `https://www.google.com/maps/search/${encodeURIComponent(loc.name + ' ' + loc.address)}`
+              const hoursStatus = isLocationCurrentlyOpen(loc.opening_hours, loc.is_open)
 
               return (
                 <motion.div
@@ -111,12 +113,12 @@ export default function LocationsPage() {
                           )}
                           <span
                             className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider"
-                            style={{ color: loc.is_open ? '#34D399' : '#EF4444' }}
+                            style={{ color: hoursStatus.isOpen ? '#34D399' : '#EF4444' }}
                           >
                             <span
-                              className={`w-2 h-2 rounded-full ${loc.is_open ? 'bg-[#34D399] animate-pulse' : 'bg-[#EF4444]'}`}
+                              className={`w-2 h-2 rounded-full ${hoursStatus.isOpen ? 'bg-[#34D399] animate-pulse' : 'bg-[#EF4444]'}`}
                             />
-                            {loc.is_open ? 'OPEN FOR ORDERS' : 'COMING SOON'}
+                            {hoursStatus.statusText}
                           </span>
                         </div>
 
@@ -143,7 +145,14 @@ export default function LocationsPage() {
                       </div>
                       <div className="flex items-center gap-2.5 text-body-sm text-[#A3A3A3]">
                         <Clock className="w-4 h-4 text-[#F59E0B] shrink-0" />
-                        <span>{loc.opening_hours}</span>
+                        <span>
+                          {loc.opening_hours}
+                          {hoursStatus.detailText && (
+                            <span className="ml-2 text-xs text-[#737373]">
+                              ({hoursStatus.detailText})
+                            </span>
+                          )}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2.5 text-body-sm text-[#A3A3A3]">
                         <Phone className="w-4 h-4 text-[#A3A3A3] shrink-0" />

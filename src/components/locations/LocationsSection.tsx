@@ -3,6 +3,7 @@ import { motion, useInView } from 'framer-motion'
 import { MapPin, Clock, Phone, ExternalLink, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { getLocations } from '@/services/locationService'
+import { isLocationCurrentlyOpen } from '@/utils'
 import type { Location } from '@/types'
 
 const CITIES = ['All', 'Islamabad', 'Rawalpindi', 'Lahore', 'Karachi']
@@ -45,7 +46,7 @@ export default function LocationsSection() {
                 className="font-display font-bold uppercase tracking-widest text-[#F59E0B]"
                 style={{ fontSize: '11px', letterSpacing: '0.1em' }}
               >
-                BEEF BURGER PATTIES LOCATIONS
+                PAPUT BURGERS LOCATIONS
               </span>
             </motion.div>
             <motion.h2
@@ -113,6 +114,8 @@ function LocationCard({ location, index }: { location: Location; index: number }
     ? `https://www.google.com/maps?q=${location.latitude},${location.longitude}`
     : `https://www.google.com/maps/search/${encodeURIComponent(location.name + ' ' + location.address)}`
 
+  const hoursStatus = isLocationCurrentlyOpen(location.opening_hours, location.is_open)
+
   return (
     <motion.div
       ref={ref}
@@ -129,8 +132,8 @@ function LocationCard({ location, index }: { location: Location; index: number }
               <span
                 className="badge text-[9px]"
                 style={{
-                  background: location.is_open ? '#FF3B1F' : '#2A2A2A',
-                  color: location.is_open ? '#FFFFFF' : '#A3A3A3',
+                  background: hoursStatus.isOpen ? '#FF3B1F' : '#2A2A2A',
+                  color: hoursStatus.isOpen ? '#FFFFFF' : '#A3A3A3',
                 }}
               >
                 {location.badge}
@@ -138,12 +141,12 @@ function LocationCard({ location, index }: { location: Location; index: number }
             )}
             <span
               className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider"
-              style={{ color: location.is_open ? '#34D399' : '#EF4444' }}
+              style={{ color: hoursStatus.isOpen ? '#34D399' : '#EF4444' }}
             >
               <span
-                className={`w-1.5 h-1.5 rounded-full ${location.is_open ? 'bg-[#34D399] animate-pulse' : 'bg-[#EF4444]'}`}
+                className={`w-1.5 h-1.5 rounded-full ${hoursStatus.isOpen ? 'bg-[#34D399] animate-pulse' : 'bg-[#EF4444]'}`}
               />
-              {location.is_open ? 'OPEN NOW' : 'COMING SOON'}
+              {hoursStatus.statusText}
             </span>
           </div>
           <h3
@@ -172,7 +175,12 @@ function LocationCard({ location, index }: { location: Location; index: number }
         </div>
         <div className="flex items-center gap-2.5 text-body-sm text-[#A3A3A3]">
           <Clock className="w-4 h-4 text-[#F59E0B] flex-shrink-0" />
-          <span>{location.opening_hours}</span>
+          <span>
+            {location.opening_hours}
+            {hoursStatus.detailText && (
+              <span className="ml-2 text-xs text-[#737373]">({hoursStatus.detailText})</span>
+            )}
+          </span>
         </div>
         <div className="flex items-center gap-2.5 text-body-sm text-[#A3A3A3]">
           <Phone className="w-4 h-4 text-[#A3A3A3] flex-shrink-0" />

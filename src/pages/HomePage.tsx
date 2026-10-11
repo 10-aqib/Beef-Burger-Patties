@@ -9,7 +9,7 @@ import AnatomySection from '@/components/anatomy/AnatomySection'
 
 export default function HomePage() {
   useEffect(() => {
-    document.title = 'Beef Burger Patties | Premium Burgers in Pakistan'
+    document.title = 'Paput Burgers | Authentic Smashed Burgers in Pakistan'
   }, [])
 
   return (

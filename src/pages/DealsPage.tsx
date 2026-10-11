@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Tag, Sparkles, ShoppingBag, ArrowRight } from 'lucide-react'
+import { Tag, ShoppingBag } from 'lucide-react'
 import { getDeals } from '@/services/productService'
 import { formatPrice } from '@/utils'
 import { useCartStore } from '@/store/cartStore'
-import { useUIStore } from '@/store/uiStore'
 import type { Deal, Product } from '@/types'
 import toast from 'react-hot-toast'
 
@@ -15,7 +14,7 @@ export default function DealsPage() {
 
   useEffect(() => {
     window.scrollTo(0, 0)
-    document.title = 'Deals | Beef Burger Patties'
+    document.title = 'Deals | Paput Burgers'
     getDeals().then((data) => {
       setDeals(data)
       setLoading(false)
@@ -51,7 +50,7 @@ export default function DealsPage() {
   }
 
   return (
-    <main className="min-h-screen pt-28 pb-20" style={{ background: '#080808' }}>
+    <main id="main-content" className="min-h-screen pt-28 pb-20" style={{ background: '#080808' }}>
       <div className="container-max">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">

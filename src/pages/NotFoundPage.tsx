@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 export default function NotFoundPage() {
   return (
     <main
+      id="main-content"
       className="min-h-screen flex items-center justify-center pt-20"
       style={{ background: '#080808' }}
     >

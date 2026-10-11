@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { MapPin, Phone, Mail, Clock, Send, CheckCircle, MessageSquare } from 'lucide-react'
+import { MapPin, Phone, Mail, Clock, Send, CheckCircle, MessageSquare, AlertCircle } from 'lucide-react'
+import { submitContactInquiry } from '@/services/contactService'
 import toast from 'react-hot-toast'
 
 export default function ContactPage() {
   useEffect(() => {
     window.scrollTo(0, 0)
-    document.title = 'Contact | Beef Burger Patties'
+    document.title = 'Contact | Paput Burgers'
   }, [])
 
   const [name, setName] = useState('')
@@ -16,6 +17,7 @@ export default function ContactPage() {
   const [message, setMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -25,14 +27,27 @@ export default function ContactPage() {
     }
 
     setSubmitting(true)
-    await new Promise((r) => setTimeout(r, 600))
+    setErrorMessage(null)
+    const res = await submitContactInquiry({
+      name,
+      email,
+      phone,
+      subject,
+      message,
+    })
     setSubmitting(false)
-    setSubmitted(true)
-    toast.success('Your message has been dispatched to our management team!')
+
+    if (res.success) {
+      setSubmitted(true)
+      toast.success(res.message)
+    } else {
+      setErrorMessage(res.message)
+      toast.error(res.message)
+    }
   }
 
   return (
-    <main className="min-h-screen pt-28 pb-20" style={{ background: '#080808' }}>
+    <main id="main-content" className="min-h-screen pt-28 pb-20" style={{ background: '#080808' }}>
       <div className="container-max max-w-6xl">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
@@ -54,7 +69,7 @@ export default function ContactPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            CONTACT <span className="text-[#FF3B1F]">BEEF BURGER PATTIES.</span>
+            CONTACT <span className="text-[#FF3B1F]">PAPUT BURGERS.</span>
           </motion.h1>
 
           <motion.p
@@ -156,6 +171,16 @@ export default function ContactPage() {
                     DISPATCH A MESSAGE
                   </h2>
 
+                  {errorMessage && (
+                    <div className="p-4 rounded bg-red-950/40 border border-red-500/50 flex items-start gap-3 text-red-200 text-body-sm">
+                      <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                      <div>
+                        <strong className="block font-bold">Submission Failed</strong>
+                        <span>{errorMessage}</span>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-label-sm text-[#A3A3A3] uppercase mb-1.5">
@@ -231,10 +256,11 @@ export default function ContactPage() {
 
                   <button
                     type="submit"
-                    className="btn-primary w-full py-3 text-label-md flex items-center justify-center gap-2"
+                    disabled={submitting}
+                    className="btn-primary w-full py-3 text-label-md flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     <Send className="w-4 h-4" />
-                    SEND DISPATCH
+                    {submitting ? 'DISPATCHING...' : 'SEND DISPATCH'}
                   </button>
                 </form>
               )}

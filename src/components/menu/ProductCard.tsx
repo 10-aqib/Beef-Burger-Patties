@@ -25,20 +25,26 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const cardRef = useRef<HTMLDivElement>(null)
   const inView = useInView(cardRef, { once: true, margin: '-50px' })
 
-  const { addItem, openCart } = useCartStore()
+  const { addItem } = useCartStore()
   const { openCustomizer } = useUIStore()
+
+  const isAvailable = product.is_available !== false
 
   const hasModifiers =
     product.modifiers && product.modifiers.length > 0 &&
     product.modifiers.some((g) => g.options.length > 0)
 
-  const badgeStyle = product.badge
+  const badgeStyle = !isAvailable
+    ? { bg: '#262626', text: '#A3A3A3' }
+    : product.badge
     ? (BADGE_STYLES[product.badge] || BADGE_STYLES.DEFAULT)
     : null
 
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
+
+    if (!isAvailable) return
 
     if (hasModifiers) {
       openCustomizer(product.id)
@@ -62,13 +68,16 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   }
 
   function handleCardClick() {
+    if (!isAvailable) return
     openCustomizer(product.id)
   }
 
   return (
     <motion.div
       ref={cardRef}
-      className="product-card group cursor-pointer flex flex-col"
+      className={`product-card group flex flex-col ${
+        isAvailable ? 'cursor-pointer' : 'opacity-70 cursor-not-allowed'
+      }`}
       initial={{ opacity: 0, y: 30 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{
@@ -78,9 +87,10 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
       }}
       onClick={handleCardClick}
       role="button"
-      tabIndex={0}
-      onKeyDown={(e) => e.key === 'Enter' && handleCardClick()}
-      aria-label={`${product.name} — ${formatPrice(product.price)}`}
+      tabIndex={isAvailable ? 0 : -1}
+      aria-disabled={!isAvailable}
+      onKeyDown={(e) => isAvailable && e.key === 'Enter' && handleCardClick()}
+      aria-label={`${product.name} — ${formatPrice(product.price)}${!isAvailable ? ' (Sold Out)' : ''}`}
     >
       {/* ─── Image ─────────────────────────────────────── */}
       <div className="relative overflow-hidden" style={{ aspectRatio: '1/1' }}>
@@ -112,14 +122,21 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
         />
 
         {/* Badge */}
-        {badgeStyle && product.badge && (
+        {!isAvailable ? (
+          <div
+            className="absolute top-3 left-3 badge font-display font-bold uppercase tracking-wider"
+            style={{ background: '#262626', color: '#D4D4D4', border: '1px solid #404040' }}
+          >
+            SOLD OUT
+          </div>
+        ) : badgeStyle && product.badge ? (
           <div
             className="absolute top-3 left-3 badge"
             style={{ background: badgeStyle.bg, color: badgeStyle.text }}
           >
             {product.badge}
           </div>
-        )}
+        ) : null}
 
         {/* Spicy indicator */}
         {product.is_spicy && (
@@ -174,23 +191,36 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
 
         {/* Add to Cart */}
         <motion.button
-          className="mt-auto w-full py-3 px-4 rounded flex items-center justify-center gap-2 font-display font-bold uppercase tracking-wider text-white transition-all duration-200 shadow-sm"
+          className={`mt-auto w-full py-3 px-4 rounded flex items-center justify-center gap-2 font-display font-bold uppercase tracking-wider text-white transition-all duration-200 shadow-sm ${
+            !isAvailable ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
           style={{
-            background: '#2A2A2A',
+            background: isAvailable ? '#2A2A2A' : '#1A1A1A',
             fontSize: '11px',
             letterSpacing: '0.08em',
           }}
-          whileHover={{
-            background: '#FF3B1F',
-            scale: 1.01,
-          }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={
+            isAvailable
+              ? {
+                  background: '#FF3B1F',
+                  scale: 1.01,
+                }
+              : {}
+          }
+          whileTap={isAvailable ? { scale: 0.98 } : {}}
           onClick={handleAddToCart}
-          aria-label={`Add ${product.name} to cart`}
+          disabled={!isAvailable}
+          aria-label={isAvailable ? `Add ${product.name} to cart` : `${product.name} is sold out`}
         >
-          <ShoppingCart className="w-3.5 h-3.5" />
-          <span>{hasModifiers ? 'CUSTOMIZE & ADD' : 'ADD TO CART'}</span>
-          {hasModifiers && <Zap className="w-3.5 h-3.5 text-[#F59E0B]" />}
+          {isAvailable ? (
+            <>
+              <ShoppingCart className="w-3.5 h-3.5" />
+              <span>{hasModifiers ? 'CUSTOMIZE & ADD' : 'ADD TO CART'}</span>
+              {hasModifiers && <Zap className="w-3.5 h-3.5 text-[#F59E0B]" />}
+            </>
+          ) : (
+            <span>OUT OF STOCK</span>
+          )}
         </motion.button>
       </div>
     </motion.div>

@@ -16,7 +16,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     window.scrollTo(0, 0)
-    document.title = 'My Account | Beef Burger Patties'
+    document.title = 'My Account | Paput Burgers'
     if (user?.id) {
       setLoadingOrders(true)
       getUserOrders(user.id).then((res) => {
@@ -28,7 +28,7 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <main className="min-h-screen pt-28 pb-20 flex items-center justify-center" style={{ background: '#080808' }}>
+      <main id="main-content" className="min-h-screen pt-28 pb-20 flex items-center justify-center" style={{ background: '#080808' }}>
         <div className="card p-10 text-center max-w-md mx-auto">
           <div className="w-16 h-16 rounded-full bg-[#1C1B1B] border border-[#2A2A2A] flex items-center justify-center mx-auto mb-4 text-[#FF3B1F]">
             <User className="w-8 h-8" />
@@ -48,7 +48,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="min-h-screen pt-28 pb-20" style={{ background: '#080808' }}>
+    <main id="main-content" className="min-h-screen pt-28 pb-20" style={{ background: '#080808' }}>
       <div className="container-max max-w-3xl">
         {/* User Card */}
         <motion.div
@@ -66,7 +66,7 @@ export default function ProfilePage() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="font-display font-bold text-white text-xl uppercase tracking-tight">
-                  {profile?.full_name || 'Beef Burger Patties VIP Member'}
+                  {profile?.full_name || 'Paput Burgers VIP Member'}
                 </h1>
                 {isAdmin && <span className="badge badge-red text-[10px]">ADMIN</span>}
               </div>
@@ -112,7 +112,7 @@ export default function ProfilePage() {
                 NO ORDERS YET
               </h3>
               <p className="text-body-sm text-[#737373] mb-6">
-                You haven't placed an order with Beef Burger Patties yet. Let's fix that!
+                You haven't placed an order with Paput Burgers yet. Let's fix that!
               </p>
               <Link to="/menu" className="btn-primary text-label-md px-6 py-2.5">
                 START YOUR FIRST ORDER

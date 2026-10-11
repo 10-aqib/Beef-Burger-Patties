@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, X, ShoppingBag, ArrowRight } from 'lucide-react'
+import { Search, X, ShoppingBag } from 'lucide-react'
 import { useUIStore } from '@/store/uiStore'
+import { useOverlayA11y } from '@/hooks/useOverlayA11y'
 import { getProducts } from '@/services/productService'
 import { formatPrice } from '@/utils'
 import type { Product } from '@/types'
@@ -12,6 +13,7 @@ export default function SearchModal() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const modalRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (searchOpen) {
@@ -20,20 +22,17 @@ export default function SearchModal() {
         setProducts(data)
         setLoading(false)
       })
-      setTimeout(() => inputRef.current?.focus(), 50)
     } else {
       setQuery('')
     }
   }, [searchOpen])
 
-  // ESC key
-  useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      if (e.key === 'Escape' && searchOpen) closeSearch()
-    }
-    window.addEventListener('keydown', handleKey)
-    return () => window.removeEventListener('keydown', handleKey)
-  }, [searchOpen, closeSearch])
+  useOverlayA11y({
+    isOpen: searchOpen,
+    onClose: closeSearch,
+    containerRef: modalRef,
+    initialFocusRef: inputRef,
+  })
 
   const filtered = query.trim()
     ? products.filter((p) => {
@@ -57,10 +56,16 @@ export default function SearchModal() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeSearch}
+            aria-hidden="true"
           />
 
           {/* Modal Container */}
           <motion.div
+            ref={modalRef}
+            tabIndex={-1}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Search menu items"
             className="fixed top-16 sm:top-24 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 z-[80]"
             initial={{ opacity: 0, y: -20, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}

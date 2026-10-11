@@ -10,12 +10,13 @@ export default function MenuPage() {
   const { products, loading: prodLoading } = useProducts(activeCategoryId)
 
   useEffect(() => {
-    document.title = 'Menu | Beef Burger Patties'
+    document.title = 'Menu | Paput Burgers'
   }, [])
 
   return (
     <main
-      className="min-h-screen pt-20"
+      id="main-content"
+      className="min-h-screen pt-24 pb-16"
       style={{ background: '#080808' }}
     >
       {/* Page header */}

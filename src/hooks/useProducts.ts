@@ -1,11 +1,7 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 import { SEED_PRODUCTS, SEED_CATEGORIES } from '@/lib/seedData'
 import type { Product, Category } from '@/types'
-
-const SUPABASE_CONFIGURED = Boolean(
-  import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY
-)
 
 // ─── Use Products Hook ────────────────────────────────────────
 export function useProducts(categoryId?: string | null) {
@@ -18,12 +14,13 @@ export function useProducts(categoryId?: string | null) {
       setLoading(true)
       setError(null)
 
-      if (!SUPABASE_CONFIGURED) {
-        // Use seed data
-        const filtered = categoryId
+      const getFallback = () =>
+        categoryId
           ? SEED_PRODUCTS.filter((p) => p.category_id === categoryId)
           : SEED_PRODUCTS
-        setProducts(filtered)
+
+      if (!isSupabaseConfigured) {
+        setProducts(getFallback())
         setLoading(false)
         return
       }
@@ -47,11 +44,16 @@ export function useProducts(categoryId?: string | null) {
         }
 
         const { data, error: err } = await query
-        if (err) throw err
-        setProducts(data || [])
-      } catch (err) {
-        setError('Unable to load menu. Please try again.')
-        console.error('[Products] Load error:', err)
+
+        if (err || !data || data.length === 0) {
+          // Graceful fallback to seed data
+          setProducts(getFallback())
+        } else {
+          setProducts(data)
+        }
+      } catch {
+        // Safe resilience fallback
+        setProducts(getFallback())
       } finally {
         setLoading(false)
       }
@@ -74,8 +76,10 @@ export function useFeaturedProducts() {
       setLoading(true)
       setError(null)
 
-      if (!SUPABASE_CONFIGURED) {
-        setProducts(SEED_PRODUCTS.filter((p) => p.is_featured))
+      const getFeaturedFallback = () => SEED_PRODUCTS.filter((p) => p.is_featured)
+
+      if (!isSupabaseConfigured) {
+        setProducts(getFeaturedFallback())
         setLoading(false)
         return
       }
@@ -96,10 +100,13 @@ export function useFeaturedProducts() {
           .order('sort_order')
           .limit(8)
 
-        if (err) throw err
-        setProducts(data || [])
+        if (err || !data || data.length === 0) {
+          setProducts(getFeaturedFallback())
+        } else {
+          setProducts(data)
+        }
       } catch {
-        setError('Unable to load featured products.')
+        setProducts(getFeaturedFallback())
       } finally {
         setLoading(false)
       }
@@ -127,9 +134,10 @@ export function useProduct(slug: string | null) {
       setLoading(true)
       setError(null)
 
-      if (!SUPABASE_CONFIGURED) {
-        const found = SEED_PRODUCTS.find((p) => p.slug === slug) || null
-        setProduct(found)
+      const getFallback = () => SEED_PRODUCTS.find((p) => p.slug === slug) || null
+
+      if (!isSupabaseConfigured) {
+        setProduct(getFallback())
         setLoading(false)
         return
       }
@@ -146,12 +154,15 @@ export function useProduct(slug: string | null) {
             )
           `)
           .eq('slug', slug)
-          .single()
+          .maybeSingle()
 
-        if (err) throw err
-        setProduct(data)
+        if (err || !data) {
+          setProduct(getFallback())
+        } else {
+          setProduct(data)
+        }
       } catch {
-        setError('Product not found.')
+        setProduct(getFallback())
       } finally {
         setLoading(false)
       }
@@ -172,8 +183,9 @@ export function useCategories() {
   useEffect(() => {
     async function load() {
       setLoading(true)
+      setError(null)
 
-      if (!SUPABASE_CONFIGURED) {
+      if (!isSupabaseConfigured) {
         setCategories(SEED_CATEGORIES)
         setLoading(false)
         return
@@ -186,10 +198,13 @@ export function useCategories() {
           .eq('is_active', true)
           .order('sort_order')
 
-        if (err) throw err
-        setCategories(data || [])
+        if (err || !data || data.length === 0) {
+          setCategories(SEED_CATEGORIES)
+        } else {
+          setCategories(data)
+        }
       } catch {
-        setError('Unable to load categories.')
+        setCategories(SEED_CATEGORIES)
       } finally {
         setLoading(false)
       }

@@ -107,14 +107,14 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 xl:gap-16 mb-14">
           {/* Brand column */}
           <div className="md:col-span-1">
-            <Link to="/" className="flex items-center gap-2.5 mb-5" aria-label="Beef Burger Patties Home">
+            <Link to="/" className="flex items-center gap-2.5 mb-5" aria-label="Paput Burgers Home">
               <Flame className="w-6 h-6 text-[#FF3B1F]" />
               <div>
                 <span
                   className="font-display font-black text-white uppercase block leading-tight text-lg"
                   style={{ letterSpacing: '-0.02em' }}
                 >
-                  BEEF BURGER PATTIES
+                  PAPUT BURGERS
                 </span>
                 <span className="font-display text-[9px] font-bold text-[#FF3B1F] uppercase tracking-widest">
                   CRAFT BURGERS · PAKISTAN
@@ -122,14 +122,14 @@ export default function Footer() {
               </div>
             </Link>
             <p className="text-body-sm text-[#737373] mb-5 leading-relaxed">
-              Beef Burger Patties — handcrafted burgers made with premium beef. Dual-pressed 100% Halal Angus
+              Paput Burgers — handcrafted smash burgers made with premium beef. Dual-pressed 100% Halal Angus
               beef on a 450°F cast iron slab.
             </p>
             <div className="flex items-center gap-3">
               {[
-                { icon: InstagramIcon, href: 'https://instagram.com/beefburgerpattiespk', label: 'Instagram' },
-                { icon: FacebookIcon, href: 'https://facebook.com/beefburgerpattiespk', label: 'Facebook' },
-                { icon: TwitterIcon, href: 'https://twitter.com/beefburgerpattiespk', label: 'Twitter/X' },
+                { icon: InstagramIcon, href: 'https://instagram.com/paputburgerspk', label: 'Instagram' },
+                { icon: FacebookIcon, href: 'https://facebook.com/paputburgerspk', label: 'Facebook' },
+                { icon: TwitterIcon, href: 'https://twitter.com/paputburgerspk', label: 'Twitter/X' },
               ].map(({ icon: Icon, href, label }) => (
                 <a
                   key={label}
@@ -177,7 +177,7 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2.5">
               {[
-                { label: 'About Beef Burger Patties', path: '/about' },
+                { label: 'About Paput Burgers', path: '/about' },
                 { label: 'All Locations & Maps', path: '/locations' },
                 { label: 'Contact & Catering', path: '/contact' },
                 { label: 'Kitchen Admin', path: '/admin' },
@@ -216,10 +216,10 @@ export default function Footer() {
               <li className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-[#A3A3A3] shrink-0" />
                 <a
-                  href="mailto:hello@beefburgerpatties.pk"
+                  href="mailto:hello@paputburgers.pk"
                   className="text-body-sm text-[#737373] hover:text-white transition-colors"
                 >
-                  hello@beefburgerpatties.pk
+                  hello@paputburgers.pk
                 </a>
               </li>
             </ul>
@@ -243,7 +243,7 @@ export default function Footer() {
           style={{ borderTop: '1px solid #1F1F1F' }}
         >
           <p className="text-body-sm text-[#525252] text-center sm:text-left">
-            © {year} Beef Burger Patties Pakistan. All rights reserved. Sizzling raw-to-order.
+            © {year} Paput Burgers Pakistan. All rights reserved. Sizzling raw-to-order.
           </p>
           <div className="flex items-center gap-4">
             <Link to="/about" className="text-body-sm text-[#525252] hover:text-[#737373] transition-colors">

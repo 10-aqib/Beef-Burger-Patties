@@ -124,14 +124,14 @@ export const useCartStore = create<CartState>()(
       },
     }),
     {
-      name: 'beef-burger-cart',
+      name: 'paput-burger-cart',
       storage: createJSONStorage(() => localStorage),
       // Only persist items — not UI state
       partialize: (state) => ({ items: state.items }),
       onRehydrateStorage: () => (state) => {
         if (state && state.items.length === 0 && typeof window !== 'undefined') {
           try {
-            const legacy = localStorage.getItem('smashd-cart')
+            const legacy = localStorage.getItem('beef-burger-cart') || localStorage.getItem('smashd-cart')
             if (legacy) {
               const parsed = JSON.parse(legacy)
               if (parsed.state?.items?.length) {

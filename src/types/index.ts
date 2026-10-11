@@ -1,5 +1,5 @@
 // ============================================================
-// Beef Burger Patties — Core TypeScript Types
+// Paput Burgers — Core TypeScript Types
 // ============================================================
 
 export type UUID = string;
@@ -133,6 +133,8 @@ export interface Order {
   delivery_address: DeliveryAddress;
   payment_method: PaymentMethod;
   payment_status: PaymentStatus;
+  payment_reference?: string | null;
+  payment_proof_url?: string | null;
   subtotal: number;
   delivery_fee: number;
   discount: number;
@@ -253,7 +255,9 @@ export interface Coupon {
   usage_limit: number | null;
   usage_count: number;
   is_active: boolean;
-  expires_at: string | null;
+  expires_at?: string | null;
+  valid_from?: string | null;
+  valid_to?: string | null;
   created_at: string;
 }
 
@@ -291,6 +295,8 @@ export interface CheckoutFormData {
   city: string;
   delivery_instructions: string;
   payment_method: PaymentMethod;
+  payment_reference?: string;
+  payment_proof_url?: string | null;
   coupon_code: string;
   special_instructions: string;
 }

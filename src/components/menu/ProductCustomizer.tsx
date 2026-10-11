@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Plus, Minus, ShoppingBag, Info, Flame } from 'lucide-react'
+import { X, Plus, Minus, ShoppingBag, Info } from 'lucide-react'
 import { useCartStore } from '@/store/cartStore'
 import { useUIStore } from '@/store/uiStore'
-import { SEED_PRODUCTS } from '@/lib/seedData'
+import { useOverlayA11y } from '@/hooks/useOverlayA11y'
 import { formatPrice } from '@/utils'
 import type { Product, ModifierOption, SelectedModifier } from '@/types'
 import toast from 'react-hot-toast'
@@ -13,6 +13,7 @@ import { getProductById } from '@/services/productService'
 export default function ProductCustomizer() {
   const { customizerProductId, closeCustomizer } = useUIStore()
   const { addItem } = useCartStore()
+  const modalRef = useRef<HTMLDivElement>(null)
 
   const [product, setProduct] = useState<Product | null>(null)
   const [quantity, setQuantity] = useState(1)
@@ -36,7 +37,28 @@ export default function ProductCustomizer() {
     getProductById(customizerProductId).then((found) => {
       setProduct(found)
       setQuantity(1)
-      setSelectedModifiers([])
+      if (found?.modifiers) {
+        const initialModifiers: SelectedModifier[] = []
+        found.modifiers.forEach((group) => {
+          if (
+            group.is_required &&
+            group.min_selections === 1 &&
+            group.max_selections === 1 &&
+            group.options.length > 0
+          ) {
+            initialModifiers.push({
+              group_id: group.id,
+              group_name: group.name,
+              option_id: group.options[0].id,
+              option_name: group.options[0].name,
+              price_adjustment: group.options[0].price_adjustment,
+            })
+          }
+        })
+        setSelectedModifiers(initialModifiers)
+      } else {
+        setSelectedModifiers([])
+      }
     })
   }, [customizerProductId])
 
@@ -71,6 +93,8 @@ export default function ProductCustomizer() {
               price_adjustment: option.price_adjustment,
             },
           ])
+        } else {
+          toast.error(`Maximum ${maxSelections} choices allowed for ${groupName}`)
         }
         return
       }
@@ -88,13 +112,21 @@ export default function ProductCustomizer() {
   }
 
   // ─── Validation ───────────────────────────────────────────
-  function isValid(): boolean {
-    if (!product?.modifiers) return true
-    return product.modifiers.every((group) => {
-      if (!group.is_required) return true
+  const missingGroups = useMemo(() => {
+    if (!product?.modifiers) return []
+    return product.modifiers.filter((group) => {
+      if (!group.is_required) return false
       const groupSelections = selectedModifiers.filter((m) => m.group_id === group.id)
-      return groupSelections.length >= group.min_selections
+      return groupSelections.length < group.min_selections
     })
+  }, [product, selectedModifiers])
+
+  const isAvailable = product?.is_available !== false
+
+  function isValid(): boolean {
+    if (!product) return false
+    if (!isAvailable) return false
+    return missingGroups.length === 0
   }
 
   // ─── Add to cart ──────────────────────────────────────────
@@ -119,20 +151,12 @@ export default function ProductCustomizer() {
     closeCustomizer()
   }
 
-  // ─── ESC key close ────────────────────────────────────────
-  useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') closeCustomizer()
-    }
-    document.addEventListener('keydown', handleKey)
-    return () => document.removeEventListener('keydown', handleKey)
-  }, [closeCustomizer])
-
-  // ─── Body scroll lock ─────────────────────────────────────
-  useEffect(() => {
-    document.body.style.overflow = isOpen ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
-  }, [isOpen])
+  // Accessible overlay management
+  useOverlayA11y({
+    isOpen,
+    onClose: closeCustomizer,
+    containerRef: modalRef,
+  })
 
   return (
     <AnimatePresence>
@@ -140,7 +164,7 @@ export default function ProductCustomizer() {
         <>
           {/* Backdrop */}
           <motion.div
-            className="fixed inset-0 bg-black/70 z-[80]"
+            className="fixed inset-0 bg-black/75 backdrop-blur-sm z-[80]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -151,6 +175,8 @@ export default function ProductCustomizer() {
 
           {/* Modal */}
           <motion.div
+            ref={modalRef}
+            tabIndex={-1}
             className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[90] w-[calc(100%-2rem)] max-w-lg max-h-[90dvh] flex flex-col"
             style={{
               background: '#121212',
@@ -377,7 +403,7 @@ export default function ProductCustomizer() {
                     className="btn-primary flex items-center gap-2 px-5 py-2.5"
                     onClick={handleAddToCart}
                     disabled={adding || !isValid()}
-                    whileTap={{ scale: 0.97 }}
+                    whileTap={isValid() ? { scale: 0.97 } : {}}
                     style={{
                       opacity: !isValid() ? 0.5 : 1,
                       cursor: !isValid() ? 'not-allowed' : 'pointer',
@@ -389,6 +415,8 @@ export default function ProductCustomizer() {
                         animate={{ rotate: 360 }}
                         transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
                       />
+                    ) : !isAvailable ? (
+                      <span>UNAVAILABLE</span>
                     ) : (
                       <>
                         <ShoppingBag className="w-4 h-4" />
@@ -399,12 +427,17 @@ export default function ProductCustomizer() {
                 </div>
               </div>
 
-              {!isValid() && (
-                <p className="text-[#FF3B1F] text-body-sm mt-2 flex items-center gap-1">
-                  <Info className="w-3 h-3" />
-                  Please select required options above
+              {!isAvailable ? (
+                <p className="text-[#FF3B1F] text-body-sm mt-2 flex items-center gap-1.5">
+                  <Info className="w-3.5 h-3.5 flex-shrink-0" />
+                  This item is currently sold out and unavailable to order.
                 </p>
-              )}
+              ) : missingGroups.length > 0 ? (
+                <p className="text-[#FF3B1F] text-body-sm mt-2 flex items-center gap-1.5">
+                  <Info className="w-3.5 h-3.5 flex-shrink-0" />
+                  Please select: {missingGroups.map((g) => g.name).join(', ')}
+                </p>
+              ) : null}
             </div>
           </motion.div>
         </>
